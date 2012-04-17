@@ -140,6 +140,40 @@
 			}
 		}
 		
+		private var status:Object;
+		private function saveStatus(e:MouseEvent = null):void
+		{
+			status = new Object();
+			
+			status.pecas = new Object();
+			
+			for (var i:int = 0; i < numChildren; i++)
+			{
+				var child:DisplayObject = getChildAt(i);
+				if (child is Peca) {
+					if (Peca(child).currentFundo != null) status.pecas[child.name] = Peca(child).currentFundo.name;
+					else status.pecas[child.name] = "null";
+				}
+			}
+		}
+		
+		private function recoverStatus(e:MouseEvent = null):void
+		{
+			for (var i:int = 0; i < numChildren; i++)
+			{
+				var child:DisplayObject = getChildAt(i);
+				if (child is Peca) {
+					if (status.pecas[child.name] != "null") {
+						Peca(child).currentFundo = getFundoByName(status.pecas[child.name]);
+						Fundo(Peca(child).currentFundo).currentPeca = Peca(child);
+						Peca(child).x = Peca(child).currentFundo.x;
+						Peca(child).y = Peca(child).currentFundo.y;
+						Peca(child).gotoAndStop(2);
+					}
+				}
+			}
+		}
+		
 		private function overMc(e:MouseEvent):void
 		{
 			var peca:Peca = Peca(e.target);
@@ -230,6 +264,7 @@
 					//tweenY = new Tween(peca, "y", None.easeNone, peca.y, fundoDrop.y, 0.5, true);
 					peca.x = fundoDrop.x;
 					peca.y = fundoDrop.y;
+					peca.gotoAndStop(2);
 				}else {
 					if(peca.currentFundo != null){
 						var pecaFundo:Peca = Peca(fundoDrop.currentPeca);
@@ -253,6 +288,7 @@
 						//tweenY = new Tween(peca, "y", None.easeNone, peca.position.y, fundoDrop.y, tweenTime, true);
 						peca.x = fundoDrop.x;
 						peca.y = fundoDrop.y;
+						peca.gotoAndStop(2);
 						
 						tweenX2 = new Tween(pecaFundo, "x", None.easeNone, pecaFundo.x, pecaFundo.inicialPosition.x, tweenTime, true);
 						tweenY2 = new Tween(pecaFundo, "y", None.easeNone, pecaFundo.y, pecaFundo.inicialPosition.y, tweenTime, true);
@@ -261,6 +297,7 @@
 						fundoDrop.currentPeca = peca;
 						
 						pecaFundo.currentFundo = null;
+						pecaFundo.gotoAndStop(1);
 					}
 				}
 			}else {
@@ -270,6 +307,7 @@
 				}
 				tweenX = new Tween(peca, "x", None.easeNone, peca.x, peca.inicialPosition.x, tweenTime, true);
 				tweenY = new Tween(peca, "y", None.easeNone, peca.y, peca.inicialPosition.y, tweenTime, true);
+				peca.gotoAndStop(1);
 			}
 			
 			verificaFinaliza();
@@ -359,6 +397,7 @@
 					child.x = Peca(child).inicialPosition.x;
 					child.y = Peca(child).inicialPosition.y;
 					Peca(child).currentFundo = null;
+					Peca(child).gotoAndStop(1);
 				}
 				if (child is Fundo) {
 					Fundo(child).currentPeca = null;
