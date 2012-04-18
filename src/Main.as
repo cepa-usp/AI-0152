@@ -1,6 +1,7 @@
 ﻿package 
 {
 	import BaseAssets.BaseMain;
+	import com.adobe.serialization.json.JSON;
 	import cepa.utils.ToolTip;
 	import fl.transitions.easing.None;
 	import fl.transitions.Tween;
@@ -9,11 +10,16 @@
 	import flash.display.Sprite;
 	import flash.events.Event;
 	import flash.events.MouseEvent;
+	import flash.events.TimerEvent;
+	import flash.external.ExternalInterface;
 	import flash.filters.GlowFilter;
 	import flash.geom.Point;
 	import flash.geom.Rectangle;
 	import flash.utils.getDefinitionByName;
 	import flash.utils.getQualifiedClassName;
+	import flash.utils.setTimeout;
+	import flash.utils.Timer;
+	import pipwerks.SCORM;
 	
 	/**
 	 * ...
@@ -43,6 +49,13 @@
 			addListeners();
 			
 			createAnswer();
+			
+			if (ExternalInterface.available) {
+				initLMSConnection();
+				if (mementoSerialized != null) {
+					if(mementoSerialized != "" && mementoSerialized != "null") recoverStatus(mementoSerialized);
+				}
+			}
 			verificaFinaliza();
 			
 			iniciaTutorial();
@@ -75,9 +88,20 @@
 			
 			if (currentScore < 100) {
 				feedbackScreen.setText("Ops!... Reveja as orientações.");
+				if (!completed) {
+					score = currentScore;
+					saveStatus();
+					commit();
+				}
 			}
 			else {
 				feedbackScreen.setText("Parabéns!\nA sequência está correta!");
+				if (!completed) {
+					completed = true;
+					score = currentScore;
+					saveStatus();
+					commit();
+				}
 			}
 			setChildIndex(feedbackScreen, numChildren - 1);
 			setChildIndex(bordaAtividade, numChildren - 1);
@@ -137,10 +161,9 @@
 			}
 		}
 		
-		private var status:Object;
-		private function saveStatus(e:MouseEvent = null):void
+		private function saveStatusForRecovery(e:MouseEvent = null):void
 		{
-			status = new Object();
+			var status:Object = new Object();
 			
 			status.pecas = new Object();
 			
@@ -152,10 +175,14 @@
 					else status.pecas[child.name] = "null";
 				}
 			}
+			
+			mementoSerialized = JSON.encode(status);
 		}
 		
-		private function recoverStatus(e:MouseEvent = null):void
+		private function recoverStatus(memento:String):void
 		{
+			var status:Object = JSON.decode(memento);
+			
 			for (var i:int = 0; i < numChildren; i++)
 			{
 				var child:DisplayObject = getChildAt(i);
@@ -296,6 +323,8 @@
 			}
 			
 			verificaFinaliza();
+			
+			setTimeout(saveStatus, (tweenTime + 0.1) * 1000);
 		}
 		
 		private function getFundo(position:Point):Fundo 
@@ -390,6 +419,7 @@
 			}
 			
 			verificaFinaliza();
+			saveStatus();
 		}
 		
 		
@@ -439,6 +469,147 @@
 			}else {
 				balao.setText(tutoSequence[tutoPos], tutoBaloonPos[tutoPos][0], tutoBaloonPos[tutoPos][1]);
 				balao.setPosition(pointsTuto[tutoPos].x, pointsTuto[tutoPos].y);
+			}
+		}
+		
+		
+		/*------------------------------------------------------------------------------------------------*/
+		//SCORM:
+		
+		private const PING_INTERVAL:Number = 5 * 60 * 1000; // 5 minutos
+		private var completed:Boolean;
+		private var scorm:SCORM;
+		private var scormExercise:int;
+		private var connected:Boolean;
+		private var score:int = 0;
+		private var pingTimer:Timer;
+		private var mementoSerialized:String = "";
+		
+		/**
+		 * @private
+		 * Inicia a conexão com o LMS.
+		 */
+		private function initLMSConnection () : void
+		{
+			completed = false;
+			connected = false;
+			scorm = new SCORM();
+			
+			pingTimer = new Timer(PING_INTERVAL);
+			pingTimer.addEventListener(TimerEvent.TIMER, pingLMS);
+			
+			connected = scorm.connect();
+			
+			if (connected) {
+				// Verifica se a AI já foi concluída.
+				var status:String = scorm.get("cmi.completion_status");	
+				mementoSerialized = scorm.get("cmi.suspend_data");
+				var stringScore:String = scorm.get("cmi.score.raw");
+			 
+				switch(status)
+				{
+					// Primeiro acesso à AI
+					case "not attempted":
+					case "unknown":
+					default:
+						completed = false;
+						break;
+					
+					// Continuando a AI...
+					case "incomplete":
+						completed = false;
+						break;
+					
+					// A AI já foi completada.
+					case "completed":
+						completed = true;
+						//setMessage("ATENÇÃO: esta Atividade Interativa já foi completada. Você pode refazê-la quantas vezes quiser, mas não valerá nota.");
+						break;
+				}
+				
+				//unmarshalObjects(mementoSerialized);
+				scormExercise = 1;
+				score = Number(stringScore.replace(",", "."));
+				
+				var success:Boolean = scorm.set("cmi.score.min", "0");
+				if (success) success = scorm.set("cmi.score.max", "100");
+				
+				if (success)
+				{
+					scorm.save();
+					pingTimer.start();
+				}
+				else
+				{
+					//trace("Falha ao enviar dados para o LMS.");
+					connected = false;
+				}
+			}
+			else
+			{
+				trace("Esta Atividade Interativa não está conectada a um LMS: seu aproveitamento nela NÃO será salvo.");
+				mementoSerialized = ExternalInterface.call("getLocalStorageString");
+			}
+			
+			//reset();
+		}
+		
+		/**
+		 * @private
+		 * Salva cmi.score.raw, cmi.location e cmi.completion_status no LMS
+		 */ 
+		private function commit()
+		{
+			if (connected)
+			{
+				// Salva no LMS a nota do aluno.
+				var success:Boolean = scorm.set("cmi.score.raw", score.toString());
+
+				// Notifica o LMS que esta atividade foi concluída.
+				success = scorm.set("cmi.completion_status", (completed ? "completed" : "incomplete"));
+
+				// Salva no LMS o exercício que deve ser exibido quando a AI for acessada novamente.
+				success = scorm.set("cmi.location", scormExercise.toString());
+				
+				// Salva no LMS a string que representa a situação atual da AI para ser recuperada posteriormente.
+				//mementoSerialized = marshalObjects();
+				success = scorm.set("cmi.suspend_data", mementoSerialized.toString());
+
+				if (success)
+				{
+					scorm.save();
+				}
+				else
+				{
+					pingTimer.stop();
+					//setMessage("Falha na conexão com o LMS.");
+					connected = false;
+				}
+			}else { //LocalStorage
+				ExternalInterface.call("save2LS", mementoSerialized);
+			}
+		}
+		
+		/**
+		 * @private
+		 * Mantém a conexão com LMS ativa, atualizando a variável cmi.session_time
+		 */
+		private function pingLMS (event:TimerEvent)
+		{
+			//scorm.get("cmi.completion_status");
+			commit();
+		}
+		
+		private function saveStatus():void
+		{
+			if (ExternalInterface.available) {
+				saveStatusForRecovery();
+				if (connected) {
+					scorm.set("cmi.suspend_data", mementoSerialized);
+					scorm.save();
+				}else {//LocalStorage
+					ExternalInterface.call("save2LS", mementoSerialized);
+				}
 			}
 		}
 		

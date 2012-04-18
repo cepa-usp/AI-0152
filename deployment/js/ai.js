@@ -27,3 +27,11 @@ function init () {
 	
 }
 
+function save2LS(str) {
+	localStorage.setItem("AI-0152-memento", str);
+}
+
+function getLocalStorageString() {
+	var stream = localStorage.getItem("AI-0152-memento");
+	return stream;
+}
