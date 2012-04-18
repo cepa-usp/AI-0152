@@ -44,7 +44,7 @@
 		private function init(e:Event = null):void 
 		{
 			removeEventListener(Event.ADDED_TO_STAGE, init);
-			this.scrollRect = new Rectangle(0, 0, 700, 760);
+			this.scrollRect = new Rectangle(0, 0, 700, 600);
 			
 			addListeners();
 			
@@ -505,7 +505,7 @@
 				var status:String = scorm.get("cmi.completion_status");	
 				mementoSerialized = scorm.get("cmi.suspend_data");
 				var stringScore:String = scorm.get("cmi.score.raw");
-			 
+				
 				switch(status)
 				{
 					// Primeiro acesso à AI
@@ -606,7 +606,7 @@
 				saveStatusForRecovery();
 				if (connected) {
 					scorm.set("cmi.suspend_data", mementoSerialized);
-					scorm.save();
+					commit();
 				}else {//LocalStorage
 					ExternalInterface.call("save2LS", mementoSerialized);
 				}

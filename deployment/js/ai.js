@@ -2,6 +2,7 @@ var scorm = pipwerks.SCORM; // Seção SCORM
 scorm.version = "2004"; // Versão da API SCORM
 
 $(document).ready(init); // Inicia a AI.
+$(window).unload(uninit); // Encerra a AI.
 
 /*
  * Inicia a Atividade Interativa (AI)
@@ -27,6 +28,11 @@ function init () {
 	
 }
 
+function uninit () {
+	scorm.save();
+	scorm.quit();
+}
+
 function save2LS(str) {
 	localStorage.setItem("AI-0152-memento", str);
 }
@@ -35,3 +41,4 @@ function getLocalStorageString() {
 	var stream = localStorage.getItem("AI-0152-memento");
 	return stream;
 }
+
