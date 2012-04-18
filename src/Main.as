@@ -44,6 +44,8 @@
 			
 			createAnswer();
 			verificaFinaliza();
+			
+			iniciaTutorial();
 		}
 		
 		private function addListeners():void 
@@ -71,9 +73,8 @@
 			
 			var currentScore:Number = int((nCertas / nPecas) * 100);
 			
-			trace(currentScore, nPecas, nCertas);
 			if (currentScore < 100) {
-				feedbackScreen.setText("Releia a questão e avalie a sequência escolhida.");
+				feedbackScreen.setText("Ops!... Reveja as orientações.");
 			}
 			else {
 				feedbackScreen.setText("Parabéns!\nA sequência está correta!");
@@ -131,10 +132,6 @@
 					child.addEventListener(Event.ACTIVATE, verifyForFilter);
 					Peca(child).buttonMode = true;
 					Peca(child).gotoAndStop(1);
-					if (child is Peca8 || child is Peca9) {
-						child.addEventListener(MouseEvent.MOUSE_OVER, overMc);
-						child.addEventListener(MouseEvent.MOUSE_OUT, outMc);
-					}
 				}
 				
 			}
@@ -174,21 +171,9 @@
 			}
 		}
 		
-		private function overMc(e:MouseEvent):void
-		{
-			var peca:Peca = Peca(e.target);
-			peca.gotoAndStop(2);
-			setChildIndex(peca, numChildren - 1);
-		}
-		
-		private function outMc(e:MouseEvent):void
-		{
-			var peca:Peca = Peca(e.target);
-			peca.gotoAndStop(1);
-		}
-		
 		private var pecaDragging:Peca;
-		private var fundoFilter:GlowFilter = new GlowFilter(0xFF0000, 1, 20, 20, 1, 2, true, true);
+		//private var fundoFilter:GlowFilter = new GlowFilter(0xFF0000, 1, 20, 20, 1, 2, true, true);
+		private var fundoFilter:GlowFilter = new GlowFilter(0x800000);
 		private var fundoWGlow:MovieClip;
 		private function verifyForFilter(e:Event):void 
 		{
@@ -405,6 +390,56 @@
 			}
 			
 			verificaFinaliza();
+		}
+		
+		
+		//---------------- Tutorial -----------------------
+		
+		private var balao:CaixaTexto;
+		private var pointsTuto:Array;
+		private var tutoBaloonPos:Array;
+		private var tutoPos:int;
+		private var tutoSequence:Array = ["Arraste os animais...", 
+										  "... para as caixas corretas...",
+										  "... conforme descrito nas orientações.",
+										  "Quando você tiver concluído, pressione \"terminei\"."];
+		
+		override public function iniciaTutorial(e:MouseEvent = null):void 
+		{
+			tutoPos = 0;
+			if(balao == null){
+				balao = new CaixaTexto(true);
+				addChild(balao);
+				balao.visible = false;
+				
+				pointsTuto = 	[new Point(320, 440),
+								new Point(230 , 130),
+								new Point(650 , 500),
+								new Point(finaliza.x, finaliza.y + finaliza.height / 2)];
+								
+				tutoBaloonPos = [[CaixaTexto.BOTTON, CaixaTexto.CENTER],
+								[CaixaTexto.BOTTON, CaixaTexto.CENTER],
+								[CaixaTexto.RIGHT, CaixaTexto.FIRST],
+								[CaixaTexto.TOP, CaixaTexto.CENTER]];
+			}
+			balao.removeEventListener(Event.CLOSE, closeBalao);
+			
+			balao.setText(tutoSequence[tutoPos], tutoBaloonPos[tutoPos][0], tutoBaloonPos[tutoPos][1]);
+			balao.setPosition(pointsTuto[tutoPos].x, pointsTuto[tutoPos].y);
+			balao.addEventListener(Event.CLOSE, closeBalao);
+			balao.visible = true;
+		}
+		
+		private function closeBalao(e:Event):void 
+		{
+			tutoPos++;
+			if (tutoPos >= tutoSequence.length) {
+				balao.removeEventListener(Event.CLOSE, closeBalao);
+				balao.visible = false;
+			}else {
+				balao.setText(tutoSequence[tutoPos], tutoBaloonPos[tutoPos][0], tutoBaloonPos[tutoPos][1]);
+				balao.setPosition(pointsTuto[tutoPos].x, pointsTuto[tutoPos].y);
+			}
 		}
 		
 	}

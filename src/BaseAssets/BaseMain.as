@@ -80,7 +80,7 @@ package BaseAssets
 		 */
 		private function adicionaListeners():void 
 		{
-			//botoes.tutorialBtn.addEventListener(MouseEvent.CLICK, iniciaTutorial);
+			botoes.tutorialBtn.addEventListener(MouseEvent.CLICK, iniciaTutorial);
 			botoes.orientacoesBtn.addEventListener(MouseEvent.CLICK, openOrientacoes);
 			botoes.creditos.addEventListener(MouseEvent.CLICK, openCreditos);
 			botoes.resetButton.addEventListener(MouseEvent.CLICK, reset);
@@ -93,12 +93,12 @@ package BaseAssets
 		 */
 		private function createToolTips():void 
 		{
-			//var intTT:ToolTip = new ToolTip(botoes.tutorialBtn, "Reiniciar tutorial", 12, 0.8, 150, 0.6, 0.1);
+			var intTT:ToolTip = new ToolTip(botoes.tutorialBtn, "Reiniciar tutorial", 12, 0.8, 150, 0.6, 0.1);
 			var instTT:ToolTip = new ToolTip(botoes.orientacoesBtn, "Orientações", 12, 0.8, 100, 0.6, 0.1);
 			var resetTT:ToolTip = new ToolTip(botoes.resetButton, "Reiniciar", 12, 0.8, 100, 0.6, 0.1);
 			var infoTT:ToolTip = new ToolTip(botoes.creditos, "Créditos", 12, 0.8, 100, 0.6, 0.1);
 			
-			//addChild(intTT);
+			addChild(intTT);
 			addChild(instTT);
 			addChild(resetTT);
 			addChild(infoTT);
