@@ -450,7 +450,7 @@
 				tutoBaloonPos = [[CaixaTexto.BOTTON, CaixaTexto.CENTER],
 								[CaixaTexto.BOTTON, CaixaTexto.CENTER],
 								[CaixaTexto.RIGHT, CaixaTexto.FIRST],
-								[CaixaTexto.TOP, CaixaTexto.CENTER]];
+								[CaixaTexto.TOP, CaixaTexto.FIRST]];
 			}
 			balao.removeEventListener(Event.CLOSE, closeBalao);
 			
