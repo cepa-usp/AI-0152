@@ -501,6 +501,7 @@
 			connected = scorm.connect();
 			
 			if (connected) {
+				scorm.set("cmi.exit", "suspend");
 				// Verifica se a AI já foi concluída.
 				var status:String = scorm.get("cmi.completion_status");	
 				mementoSerialized = scorm.get("cmi.suspend_data");

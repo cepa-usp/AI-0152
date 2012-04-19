@@ -2,7 +2,6 @@ var scorm = pipwerks.SCORM; // Seção SCORM
 scorm.version = "2004"; // Versão da API SCORM
 
 $(document).ready(init); // Inicia a AI.
-$(window).unload(uninit); // Encerra a AI.
 
 /*
  * Inicia a Atividade Interativa (AI)
@@ -26,11 +25,6 @@ function init () {
 
 	swfobject.embedSWF("swf/AI_Loader.swf", "ai-container", flashvars.width, flashvars.height, "10.0.0", "expressInstall.swf", flashvars, params, attributes);
 	
-}
-
-function uninit () {
-	scorm.save();
-	scorm.quit();
 }
 
 function save2LS(str) {
