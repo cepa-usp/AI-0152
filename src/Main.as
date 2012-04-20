@@ -358,7 +358,7 @@
 				child.fundo = [fundo1];
 				child.nome = "peca1";
 			}else if (child is Peca2) {
-				child.fundo = [fundo2];
+				//child.fundo = [fundo2];
 				child.nome = "peca2";
 			}else if (child is Peca3) {
 				child.fundo = [fundo3];
@@ -367,7 +367,7 @@
 				child.fundo = [fundo4];
 				child.nome = "peca4";
 			}else if (child is Peca5) {
-				child.fundo = [fundo5];
+				//child.fundo = [fundo5];
 				child.nome = "peca5";
 			}else if (child is Peca6) {
 				child.fundo = [fundo6];
@@ -376,7 +376,7 @@
 				child.fundo = [fundo7];
 				child.nome = "peca7";
 			}else if (child is Peca8) {
-				child.fundo = [fundo8];
+				//child.fundo = [fundo8];
 				child.nome = "peca8";
 			}else if (child is Peca9) {
 				child.fundo = [fundo9];
@@ -394,7 +394,7 @@
 				child.fundo = [fundo13];
 				child.nome = "peca13";
 			}else if (child is Peca14) {
-				child.fundo = [fundo14];
+				//child.fundo = [fundo14];
 				child.nome = "peca14";
 			}else if (child is Peca15) {
 				child.fundo = [fundo15];
@@ -442,8 +442,8 @@
 				addChild(balao);
 				balao.visible = false;
 				
-				pointsTuto = 	[new Point(320, 440),
-								new Point(230 , 130),
+				pointsTuto = 	[new Point(330, 470),
+								new Point(235 , 150),
 								new Point(650 , 500),
 								new Point(finaliza.x, finaliza.y + finaliza.height / 2)];
 								
