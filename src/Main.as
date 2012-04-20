@@ -132,6 +132,7 @@
 		{
 			finaliza.addEventListener(MouseEvent.CLICK, finalizaExec);
 			finaliza.buttonMode = true;
+			orientacoesScreen.addEventListener("clicado", saveStatus);
 		}
 		
 		private function finalizaExec(e:MouseEvent):void 
@@ -687,7 +688,7 @@
 			commit();
 		}
 		
-		private function saveStatus():void
+		private function saveStatus(e:Event = null):void
 		{
 			if (ExternalInterface.available) {
 				saveStatusForRecovery();
