@@ -58,7 +58,9 @@
 			}
 			verificaFinaliza();
 			
-			iniciaTutorial();
+			if (completed) {
+				travaPecas();
+			}else iniciaTutorial();
 		}
 		
 		private function addListeners():void 
@@ -87,24 +89,40 @@
 			var currentScore:Number = int((nCertas / nPecas) * 100);
 			
 			if (currentScore < 100) {
-				feedbackScreen.setText("Ops!... Reveja as orientações.");
-				if (!completed) {
-					score = currentScore;
-					saveStatus();
-					commit();
-				}
+				feedbackScreen.setText("Ops!... \nInicie uma nova tentativa para refazer o exercício.");
 			}
 			else {
 				feedbackScreen.setText("Parabéns!\nA sequência está correta!");
-				if (!completed) {
-					completed = true;
-					score = currentScore;
-					saveStatus();
-					commit();
-				}
 			}
+			
+			if (!completed) {
+				completed = true;
+				score = currentScore;
+				saveStatus();
+				commit();
+				
+				travaPecas();
+			}
+			
 			setChildIndex(feedbackScreen, numChildren - 1);
 			setChildIndex(bordaAtividade, numChildren - 1);
+		}
+		
+		private function travaPecas():void 
+		{
+			for (var i:int = 0; i < numChildren; i++) 
+			{
+				var child:DisplayObject = getChildAt(i);
+				if (child is Peca) {
+					Peca(child).mouseEnabled = false;
+				}
+			}
+			
+			finaliza.mouseEnabled = false;
+			finaliza.alpha = 0.5;
+			
+			botoes.resetButton.mouseEnabled = false;
+			botoes.resetButton.alpha = 0.5;
 		}
 		
 		private function verificaFinaliza():void 
