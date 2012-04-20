@@ -25,7 +25,7 @@
 	 * ...
 	 * @author Alexandre
 	 */
-	public class Main extends BaseMain
+	public class Main extends Sprite
 	{
 		private var tweenX:Tween;
 		private var tweenY:Tween;
@@ -46,6 +46,7 @@
 			removeEventListener(Event.ADDED_TO_STAGE, init);
 			this.scrollRect = new Rectangle(0, 0, 700, 600);
 			
+			adicionaListeners();
 			addListeners();
 			
 			createAnswer();
@@ -61,6 +62,70 @@
 			if (completed) {
 				travaPecas();
 			}else iniciaTutorial();
+		}
+		
+		/**
+		 * Adiciona os eventListeners nos botões.
+		 */
+		private function adicionaListeners():void 
+		{
+			makeButton(botoes.tutorialBtn);
+			makeButton(botoes.orientacoesBtn);
+			makeButton(botoes.creditos);
+			makeButton(botoes.resetButton);
+			
+			botoes.tutorialBtn.addEventListener(MouseEvent.CLICK, iniciaTutorial);
+			botoes.orientacoesBtn.addEventListener(MouseEvent.CLICK, openOrientacoes);
+			botoes.creditos.addEventListener(MouseEvent.CLICK, openCreditos);
+			botoes.resetButton.addEventListener(MouseEvent.CLICK, reset);
+			
+			createToolTips();
+		}
+		
+		private function makeButton(btn:MovieClip):void
+		{
+			btn.gotoAndStop(1);
+			btn.buttonMode = true;
+			btn.mouseChildren = false;
+			btn.addEventListener(MouseEvent.MOUSE_OVER, function(e:MouseEvent):void {MovieClip(e.target).gotoAndStop(2) } );
+			btn.addEventListener(MouseEvent.MOUSE_OUT, function(e:MouseEvent):void {MovieClip(e.target).gotoAndStop(1) } );
+		}
+		
+		/**
+		 * Cria os tooltips nos botões
+		 */
+		private function createToolTips():void 
+		{
+			var intTT:ToolTip = new ToolTip(botoes.tutorialBtn, "Reiniciar tutorial", 12, 0.8, 150, 0.6, 0.1);
+			var instTT:ToolTip = new ToolTip(botoes.orientacoesBtn, "Orientações", 12, 0.8, 100, 0.6, 0.1);
+			var resetTT:ToolTip = new ToolTip(botoes.resetButton, "Reiniciar", 12, 0.8, 100, 0.6, 0.1);
+			var infoTT:ToolTip = new ToolTip(botoes.creditos, "Créditos", 12, 0.8, 100, 0.6, 0.1);
+			
+			addChild(intTT);
+			addChild(instTT);
+			addChild(resetTT);
+			addChild(infoTT);
+			
+		}
+		
+		/**
+		 * Abrea a tela de orientações.
+		 */
+		private function openOrientacoes(e:MouseEvent):void 
+		{
+			orientacoesScreen.openScreen();
+			setChildIndex(orientacoesScreen, numChildren - 1);
+			setChildIndex(bordaAtividade, numChildren - 1);
+		}
+		
+		/**
+		 * Abre a tela de créditos.
+		 */
+		private function openCreditos(e:MouseEvent):void 
+		{
+			creditosScreen.openScreen();
+			setChildIndex(creditosScreen, numChildren - 1);
+			setChildIndex(bordaAtividade, numChildren - 1);
 		}
 		
 		private function addListeners():void 
@@ -184,6 +249,7 @@
 			var status:Object = new Object();
 			
 			status.pecas = new Object();
+			status.selecteds = orientacoesScreen.saveStatus();
 			
 			for (var i:int = 0; i < numChildren; i++)
 			{
@@ -214,6 +280,8 @@
 					}
 				}
 			}
+			
+			orientacoesScreen.setStatus(status.selecteds);
 		}
 		
 		private var pecaDragging:Peca;
@@ -420,7 +488,7 @@
 			}
 		}
 		
-		override public function reset(e:MouseEvent = null):void
+		public function reset(e:MouseEvent = null):void
 		{
 			for (var i:int = 0; i < numChildren; i++)
 			{
@@ -452,7 +520,7 @@
 										  "... conforme descrito nas orientações.",
 										  "Quando você tiver concluído, pressione \"terminei\"."];
 		
-		override public function iniciaTutorial(e:MouseEvent = null):void 
+		public function iniciaTutorial(e:MouseEvent = null):void 
 		{
 			tutoPos = 0;
 			if(balao == null){
